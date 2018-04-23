@@ -7,6 +7,7 @@
 #include<netinet/if_ether.h>
 #include<netinet/ip.h>
 */
+#include<netinet/in.h>
 #include"initrawsock.h"
 /*
 struct ip_packet {
@@ -67,7 +68,25 @@ int main(int argc, char **argv){
   }
 
 	//struct ip_packet packet;
-	write(sock, icmp_packet, strlen(icmp_packet));
+	//write(sock, icmp_packet, strlen(icmp_packet));
+
+	struct sockaddr_in to;
+	to.sin_addr.s_addr = (u_long)0x0a000006;
+	to.sin_family = AF_INET;
+	//to.sin_port = ;
+
+	int n;
+#if 0
+	if ((n = write(sock, icmp_packet, strlen(icmp_packet))) <= 0){
+		fprintf(stdout, "can not send packet\n");
+		exit(1);
+	}
+	fflush(sock);
+#endif
+	if ((n = sendto(sock, (char *)icmp_packet, strlen(icmp_packet), 0, (struct sockaddr *)&to, sizeof(to))) <= 0){
+		fprintf(stdout, "can not send packet\n");
+		exit(1);
+	}
 	
 	close(sock);
 }
