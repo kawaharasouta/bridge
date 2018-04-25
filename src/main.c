@@ -54,39 +54,58 @@ u_int16_t arp_packet[100] = {
 
 
 int main(int argc, char **argv){
-	int sock, size;
+	int sock, size, sock_eth3, sock_eth2;
 	u_char buf[2048];
 
-	if (argc < 2){ 
-    fprintf(stderr, "usage: ./main [dev-name]\n");
+	//if (argc < 2){ 
+  //  fprintf(stderr, "usage: ./main [dev-name]\n");
+  //  exit(1);
+  //}
+
+  //if ((sock = initrawsock(argv[1], 1, 0)) < 0){ 
+  if ((sock_eth3 = initrawsock("eth3", 1, 0)) < 0){ 
+    //fprintf(stderr, "InitRawSocket:error:%s\n", argv[1]);
+    fprintf(stderr, "InitRawSocket:error:eth3\n");
     exit(1);
   }
-
-  if ((sock = initrawsock(argv[1], 0, 0)) < 0){ 
-    fprintf(stderr, "InitRawSocket:error:%s\n", argv[1]);
+  if ((sock_eth2 = initrawsock("eth2", 1, 0)) < 0){ 
+    //fprintf(stderr, "InitRawSocket:error:%s\n", argv[1]);
+    fprintf(stderr, "InitRawSocket:error:eth3\n");
     exit(1);
   }
 
 	//struct ip_packet packet;
 	//write(sock, icmp_packet, strlen(icmp_packet));
 
-	struct sockaddr_in to;
-	to.sin_addr.s_addr = (u_long)0x0a000006;
-	to.sin_family = AF_INET;
+	//struct sockaddr_in to;
+	//to.sin_addr.s_addr = (u_long)0x0a000006;
+	//to.sin_family = AF_INET;
 	//to.sin_port = ;
 
+
+	if (((size = read(sock_eth3, buf, sizeof(buf))) <= 0)){
+		fprintf(stderr, "readerr\n");
+		exit(1);
+	}
+	printf("read success\n");
+
 	int n;
-#if 0
-	if ((n = write(sock, icmp_packet, strlen(icmp_packet))) <= 0){
+#if 1
+	//if ((n = write(sock, icmp_packet, strlen(icmp_packet))) <= 0){
+	if ((n = write(sock_eth2, buf, size)) <= 0){
 		fprintf(stdout, "can not send packet\n");
 		exit(1);
 	}
-	fflush(sock);
-#endif
+	//fflush(sock_eth2);
+	printf("write success\n");
+
+#else
 	if ((n = sendto(sock, (char *)icmp_packet, strlen(icmp_packet), 0, (struct sockaddr *)&to, sizeof(to))) <= 0){
 		fprintf(stdout, "can not send packet\n");
 		exit(1);
 	}
+#endif
 	
-	close(sock);
+	close(sock_eth2);
+	close(sock_eth3);
 }
